@@ -15,6 +15,10 @@ ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.dirname(ROOT_DIR))
 from utils import singleton, get_project_dir, configure_logging
 
+from dotenv import load_dotenv
+# Load environment variables from .env file
+load_dotenv()
+
 DATA_DIR = os.path.abspath(os.path.join(ROOT_DIR, '../data'))
 if not os.path.exists(DATA_DIR):
     os.makedirs(DATA_DIR)
