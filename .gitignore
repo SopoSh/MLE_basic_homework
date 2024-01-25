@@ -4,7 +4,7 @@ __pycache__/
 .vscode
 
 # Directories
-data/
+#data/
 models/
 results/
 mlruns/
@@ -15,7 +15,7 @@ mlruns/
 *.pyc
 
 # Environment Variables
-.env
+#.env
 
 # Installer logs
 pip-log.txt

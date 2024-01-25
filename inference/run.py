@@ -10,7 +10,6 @@ import os
 import pickle
 import sys
 from datetime import datetime
-from typing import List
 
 import pandas as pd
 from sklearn.tree import DecisionTreeClassifier
