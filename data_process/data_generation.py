@@ -37,45 +37,46 @@ DATA_DIR = get_project_dir(conf['general']['data_dir'])
 TRAIN_PATH = os.path.join(DATA_DIR, conf['train']['table_name'])
 INFERENCE_PATH = os.path.join(DATA_DIR, conf['inference']['inp_table_name'])
 
-# Singleton class for generating XOR data set
-@singleton
-class XorSetGenerator():
-    def __init__(self):
-        self.df = None
 
-    # Method to create the XOR data
-    def create(self, len: int, save_path: os.path, is_labeled: bool = True):
-        logger.info("Creating XOR dataset...")
-        self.df = self._generate_features(len)
-        if is_labeled:
-            self.df = self._generate_target(self.df)
-        if save_path:
-            self.save(self.df, save_path)
-        return self.df
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from sklearn.datasets import load_iris
 
-    # Method to generate features
-    def _generate_features(self, n: int) -> pd.DataFrame:
-        logger.info("Generating features...")
-        x1 = np.random.choice([True, False], size=n)
-        x2 = np.random.choice([True, False], size=n)
-        return pd.DataFrame(list(zip(x1, x2)), columns=['x1', 'x2'])
+# Function to load the Iris dataset from Wikipedia
+def load_iris_data():
+    iris = load_iris()
+    data = pd.DataFrame(data=iris.data, columns=iris.feature_names)
+    data['target'] = iris.target
+    return data
 
-    # Method to generate target
-    def _generate_target(self, df: pd.DataFrame) -> pd.DataFrame:
-        logger.info("Generating target...")
-        df['y'] = np.logical_xor(df['x1'], df['x2'])
-        return df
-    
-    # Method to save data
-    def save(self, df: pd.DataFrame, out_path: os.path):
-        logger.info(f"Saving data to {out_path}...")
-        df.to_csv(out_path, index=False)
+# Function to preprocess the data and split it into training and inference sets
+def preprocess_data(data = load_iris_data()):
+    X = data.iloc[:, :-1].values
+    y = data['target'].values
+
+    # Standardize the features
+    scaler = StandardScaler()
+    X = scaler.fit_transform(X)
+
+    # Split the data into training and inference sets
+    X_train, X_inference, y_train, y_inference = train_test_split(X, y, test_size=0.2, random_state=42)
+
+    # Combine features and labels using pandas.concat
+    train_df = pd.DataFrame(data=np.concatenate((X_train, y_train.reshape(-1, 1)), axis=1), columns=data.columns)
+    inference_df = pd.DataFrame(data=np.concatenate((X_inference, y_inference.reshape(-1, 1)), axis=1),
+                                columns=data.columns)
+
+    logger.info(f"Saving train data to {TRAIN_PATH}...")
+    train_df.to_csv(TRAIN_PATH, index=False)
+
+    logger.info(f"Saving inference data to {INFERENCE_PATH}...")
+    inference_df.to_csv(INFERENCE_PATH, index=False)
+
+    return X_train, y_train, X_inference, y_inference
 
 # Main execution
 if __name__ == "__main__":
     configure_logging()
     logger.info("Starting script...")
-    gen = XorSetGenerator()
-    gen.create(len=256, save_path=TRAIN_PATH)
-    gen.create(len=64, save_path=INFERENCE_PATH, is_labeled=False)
+    preprocess_data(load_iris_data())
     logger.info("Script completed successfully.")
