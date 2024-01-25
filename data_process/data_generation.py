@@ -6,6 +6,12 @@ import os
 import sys
 import json
 
+from dotenv import load_dotenv
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from sklearn.datasets import load_iris
+
+
 # Create logger
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -13,9 +19,9 @@ logger.setLevel(logging.INFO)
 # Define directories
 ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.dirname(ROOT_DIR))
-from utils import singleton, get_project_dir, configure_logging
 
-from dotenv import load_dotenv
+from utils import get_project_dir, configure_logging
+
 # Load environment variables from .env file
 load_dotenv()
 
@@ -36,11 +42,6 @@ logger.info("Defining paths...")
 DATA_DIR = get_project_dir(conf['general']['data_dir'])
 TRAIN_PATH = os.path.join(DATA_DIR, conf['train']['table_name'])
 INFERENCE_PATH = os.path.join(DATA_DIR, conf['inference']['inp_table_name'])
-
-
-from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import StandardScaler
-from sklearn.datasets import load_iris
 
 # Function to load the Iris dataset from Wikipedia
 def load_iris_data():
@@ -80,3 +81,4 @@ if __name__ == "__main__":
     logger.info("Starting script...")
     preprocess_data(load_iris_data())
     logger.info("Script completed successfully.")
+
